@@ -69,8 +69,9 @@ class Loader():
         x_sample = pickle.load(x_sample_dbfile)
         y_sample = pickle.load(y_sample_dbfile)
         pt_sample = pickle.load(pt_sample_dbfile)
+        param_sample = [A, fc, fm]
         #print(type(x_sample), type(y_sample), type(pt_sample))
-        return x_sample, y_sample, pt_sample
+        return x_sample, y_sample, pt_sample, param_sample
 
     def generate_filenames(self, A: float, Fc: float, Fm: float) -> tuple[str, str, str]:
         ID = self.get_ID(A, Fc, Fm)
@@ -100,7 +101,7 @@ class Loader():
 
     def load_db(self, A_list : list, fc_list: list, fm_list: list):
         #sample0 = self.get_sample(A_list[0], fc_list[0], fm_list[0])
-        x, y, pt = [], [], []
+        x, y, pt, params = [], [], [], []
         items = [(A, fc, fm) for fm in fm_list for fc in fc_list for A in A_list]
         if IS_PARALLEL_PROCESSING:
             with ProcessPoolExecutor(max_workers=10) as pool:
@@ -113,6 +114,7 @@ class Loader():
             x.append(result[0])
             y.append(result[1])
             pt.append(result[2])
+            params.append(result[3])
 
         # for A in A_list:
         #     for fc in fc_list:
@@ -132,7 +134,8 @@ class Loader():
             print("x1000: ", x[1000].shape)
         y = np.stack(y, axis=0)
         pt = np.stack(pt, axis=0)
-        return x, y, pt
+        params = np.stack(params, axis=0)
+        return x, y, pt, params
 
 
 def main():
